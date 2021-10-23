@@ -7,6 +7,7 @@ using Wikibot.Logic.FileManagers;
 using Wikibot.Logic.JobRetrievers;
 using Wikibot.Logic.Jobs;
 using Wikibot.Logic.Logic;
+using Wikibot.Logic.UserRetrievers;
 using WikiClientLibrary;
 using Xunit;
 using Xunit.Abstractions;
@@ -50,11 +51,13 @@ namespace Wikibot.Tests
         {
             var iConfig = Utilities.GetIConfigurationRoot();
             var requestData = Utilities.GetRequestData(null);
-            var wikiAccessLogic = new WikiAccessLogic();
+            var logger = Utilities.GetLogger(iConfig, _output);
+            var wikiAccessLogic = new WikiAccessLogic(iConfig, logger);
+            var userRetriever = new TFWikiUserRetriever(wikiAccessLogic);
             var textFileManager = new TextFileManager();
             var retriever = new TextFileJobRetriever(iConfig, "WikiJobTest.txt",textFileManager);
-            var logger = Utilities.GetLogger(iConfig, _output);
-            var job = new JobRetrievalJob(iConfig, logger, retriever, wikiAccessLogic, requestData);
+            
+            var job = new JobRetrievalJob(iConfig, logger, retriever, userRetriever, requestData);
             job.Execute();
         }
 
@@ -63,9 +66,10 @@ namespace Wikibot.Tests
         {
             var iConfig = Utilities.GetIConfigurationRoot();
             var logger = Utilities.GetLogger(iConfig, _output);
-            var wikiAccessLogic = new WikiAccessLogic();
+            var wikiAccessLogic = new WikiAccessLogic(iConfig,logger);
             var sqlDataAccess = new SqlDataAccess(iConfig);
-            var retriever = new TFWikiJobRetriever(iConfig, logger, wikiAccessLogic, sqlDataAccess);
+            var userRetriever = new TFWikiUserRetriever(wikiAccessLogic);
+            var retriever = new TFWikRequestRetriever(iConfig, logger, sqlDataAccess);
             var definitions = retriever.GetNewJobDefinitions().Result;
             Assert.NotNull(definitions);
         }
@@ -76,10 +80,11 @@ namespace Wikibot.Tests
             var iConfig = Utilities.GetIConfigurationRoot();
             var requestData = Utilities.GetRequestData(null);
             var logger = Utilities.GetLogger(iConfig, _output);
-            var wikiAccessLogic = new WikiAccessLogic();
+            var wikiAccessLogic = new WikiAccessLogic(iConfig, logger);
             var sqlDataAccess = new SqlDataAccess(iConfig);
-            var retriever = new TFWikiJobRetriever(iConfig, logger, wikiAccessLogic, sqlDataAccess);
-            var job = new JobRetrievalJob(iConfig, logger, retriever, wikiAccessLogic, requestData);
+            var userRetriever = new TFWikiUserRetriever(wikiAccessLogic);
+            var retriever = new TFWikRequestRetriever(iConfig, logger, sqlDataAccess);
+            var job = new JobRetrievalJob(iConfig, logger, retriever, userRetriever, requestData);
             job.Execute();
         }
 

@@ -5,6 +5,8 @@ using Wikibot.Logic.Jobs;
 using Wikibot.Logic.Logic;
 using Xunit;
 using Xunit.Abstractions;
+using System.Linq;
+using System;
 
 namespace Wikibot.Tests
 {
@@ -20,7 +22,8 @@ namespace Wikibot.Tests
         public void ExecuteTextReplacementJob()
         {
             var iConfig = Utilities.GetIConfigurationRoot();
-            var wikiAccessLogic = new WikiAccessLogic();
+            var logger = Utilities.GetLogger(iConfig, _output);
+            var wikiAccessLogic = new WikiAccessLogic(iConfig,logger);
             var log = Utilities.GetLogger(iConfig, _output);
             var jobData = Utilities.GetRequestData(null);
             var request = Utilities.GetSampleJobRequest();
@@ -35,7 +38,8 @@ namespace Wikibot.Tests
         public void ExecuteLinkFixJob()
         {
             var iConfig = Utilities.GetIConfigurationRoot();
-            var wikiAccessLogic = new WikiAccessLogic();
+            var logger = Utilities.GetLogger(iConfig, _output);
+            var wikiAccessLogic = new WikiAccessLogic(iConfig, logger);
             var log = Utilities.GetLogger(iConfig, _output);
             var jobData = Utilities.GetRequestData(null);
             var request = Utilities.GetSampleLinkFixJobRequest();
@@ -50,7 +54,8 @@ namespace Wikibot.Tests
         public void ExecuteLinkFixJobLinkTextNotRetainedIfNoCustomText()
         {
             var iConfig = Utilities.GetIConfigurationRoot();
-            var wikiAccessLogic = new WikiAccessLogic();
+            var logger = Utilities.GetLogger(iConfig, _output);
+            var wikiAccessLogic = new WikiAccessLogic(iConfig, logger);
             var log = Utilities.GetLogger(iConfig, _output);
             var jobData = Utilities.GetRequestData(null);
             var request = Utilities.GetSampleLinkFixJobRequest();
@@ -65,7 +70,8 @@ namespace Wikibot.Tests
         public void ExecuteContinuityLinkFixJob()
         {
             var iConfig = Utilities.GetIConfigurationRoot();
-            var wikiAccessLogic = new WikiAccessLogic();
+            var logger = Utilities.GetLogger(iConfig, _output);
+            var wikiAccessLogic = new WikiAccessLogic(iConfig, logger);
             var log = Utilities.GetLogger(iConfig, _output);
             var jobData = Utilities.GetRequestData(null);
             var request = Utilities.GetSampleContinuityLinkFixJobRequest();

@@ -1,22 +1,18 @@
 ﻿using Dapper;
-using LinqToWiki;
 using LinqToWiki.Generated;
-using Microsoft.AspNetCore.Http;
-using Microsoft.EntityFrameworkCore.Query.Internal;
 using Microsoft.Extensions.Configuration;
-using Microsoft.VisualStudio.TestPlatform.ObjectModel.DataCollection;
 using Moq;
 using MwParserFromScratch;
 using MwParserFromScratch.Nodes;
 using Serilog;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using Wikibot.DataAccess;
 using Wikibot.DataAccess.Objects;
 using Wikibot.Logic.Extensions;
 using Wikibot.Logic.Factories;
+using Wikibot.Logic.Logic;
 using Wikibot.Logic.UserRetrievers;
 using WikiClientLibrary;
 using WikiClientLibrary.Client;
@@ -44,7 +40,7 @@ namespace Wikibot.Tests
             var username = wikiLoginConfig["Username"];
             var password = wikiLoginConfig["Password"];
             var apiPath = wikiLoginConfig["APIPath"];
-      
+
             var wiki = new Wiki("WikiBot", "https://tfwiki.net", apiPath);
             var result = wiki.login(username, password);
 
@@ -69,7 +65,7 @@ namespace Wikibot.Tests
             var password = WikiConfig["Password"];
             var url = WikiConfig["APIUrl"];
             var apiPath = WikiConfig["APIPath"];
-            var fullURL = url+apiPath;
+            var fullURL = url + apiPath;
             // You can create multiple WikiSite instances on the same WikiClient to share the state.
             var site = new WikiSite(client, fullURL);
 
@@ -98,10 +94,10 @@ namespace Wikibot.Tests
                 .CreateLogger();
         }
 
-        public static IUserRetriever GetUserRetriever(IConfiguration config)
+        public static IUserRetriever GetUserRetriever(IConfiguration config, ILogger log)
         {
-            var wiki = GetWiki(config);
-            return new TFWikiUserRetriever(wiki);
+            var accessLogic = new WikiAccessLogic(config, log);
+            return new TFWikiUserRetriever(accessLogic);
         }
 
         public static WikiJobRequest GetSampleJobRequest()
@@ -142,7 +138,7 @@ namespace Wikibot.Tests
                 var templates = ast.Lines.First<LineNode>().EnumDescendants().OfType<Template>();
                 var request = WikiJobRequestFactory.GetWikiJobRequest(JobType.TextReplacementJob, TimeZoneInfo.Local, templates.First());
                 request.ID = x + 2;
-                if(!includePages)
+                if (!includePages)
                 {
                     request.Pages = null;
                 }
@@ -202,7 +198,7 @@ namespace Wikibot.Tests
             var updateTimePreFinish = GetTimePreFinishParams(DateTime.UtcNow);
 
             var updateTimeFinish = GetTimeFinishParams(DateTime.UtcNow);
-            
+
             var pages = new List<DataAccess.Objects.Page>();
             pages.Add(new DataAccess.Objects.Page(0, "NewPage"));
             var updatePages = GetUpdatePageParams(pages, request.ID);
@@ -213,10 +209,10 @@ namespace Wikibot.Tests
             var approvalRequests = GetSampleJobRequests(true).Where(x => x.Status == JobStatus.PendingPreApproval || x.Status == JobStatus.PendingApproval).ToList();
 
             //Instruct the mock
-            mock.Setup(dataAccess => dataAccess.LoadDataComplex<WikiJobRequest, DataAccess.Objects.Page, dynamic>("dbo.spGetWikiJobRequestById", It.Is<object>(y => VerifyHelper.AreEqualObjects(y, ldcParams)), "JobDb", types, It.IsAny<Func<WikiJobRequest, DataAccess.Objects.Page, WikiJobRequest>>(), "PageId")).Returns(GetSampleJobRequests(true).Where(request=> request.ID == ldcParams.RequestID).ToList());
+            mock.Setup(dataAccess => dataAccess.LoadDataComplex<WikiJobRequest, DataAccess.Objects.Page, dynamic>("dbo.spGetWikiJobRequestById", It.Is<object>(y => VerifyHelper.AreEqualObjects(y, ldcParams)), "JobDb", types, It.IsAny<Func<WikiJobRequest, DataAccess.Objects.Page, WikiJobRequest>>(), "PageId")).Returns(GetSampleJobRequests(true).Where(request => request.ID == ldcParams.RequestID).ToList());
             mock.Setup(dataAccess => dataAccess.LoadData<WikiJobRequest, dynamic>("dbo.spGetWikiJobRequests", It.Is<object>(y => VerifyHelper.AreEqualObjects(y, ldParams)), "JobDb")).Returns(GetSampleJobRequests(false));
-            mock.Setup(dataAccess => dataAccess.LoadDataComplex<WikiJobRequest, DataAccess.Objects.Page, dynamic >("dbo.spGetWikiJobRequests", It.Is<object>(y => VerifyHelper.AreEqualObjects(y, ldParams)), "JobDb", types, It.IsAny<Func<WikiJobRequest, DataAccess.Objects.Page, WikiJobRequest>>(), "PageId")).Returns(GetSampleJobRequests(true));
-            mock.Setup(dataAccess => dataAccess.LoadDataComplex<WikiJobRequest, DataAccess.Objects.Page, dynamic >("dbo.spGetWikiJobRequestsForApproval", It.Is<object>(y => VerifyHelper.AreEqualObjects(y, ldParams)), "JobDb", types, It.IsAny<Func<WikiJobRequest, DataAccess.Objects.Page, WikiJobRequest>>(), "PageId")).Returns(GetSampleJobRequests(true).Where(x=> x.Status == JobStatus.PendingPreApproval || x.Status == JobStatus.PendingApproval).ToList());
+            mock.Setup(dataAccess => dataAccess.LoadDataComplex<WikiJobRequest, DataAccess.Objects.Page, dynamic>("dbo.spGetWikiJobRequests", It.Is<object>(y => VerifyHelper.AreEqualObjects(y, ldParams)), "JobDb", types, It.IsAny<Func<WikiJobRequest, DataAccess.Objects.Page, WikiJobRequest>>(), "PageId")).Returns(GetSampleJobRequests(true));
+            mock.Setup(dataAccess => dataAccess.LoadDataComplex<WikiJobRequest, DataAccess.Objects.Page, dynamic>("dbo.spGetWikiJobRequestsForApproval", It.Is<object>(y => VerifyHelper.AreEqualObjects(y, ldParams)), "JobDb", types, It.IsAny<Func<WikiJobRequest, DataAccess.Objects.Page, WikiJobRequest>>(), "PageId")).Returns(GetSampleJobRequests(true).Where(x => x.Status == JobStatus.PendingPreApproval || x.Status == JobStatus.PendingApproval).ToList());
             mock.Setup(dataAccess => dataAccess.SaveData<dynamic>("dbo.spCreateWikiJobRequest", It.Is<object>(y => VerifyHelper.AreEqualObjects(y, sdParams)), "JobDb"));
             mock.Setup(dataAccess => dataAccess.SaveData<dynamic>("dbo.spUpdateWikiJobRequestStatus", It.Is<object>(y => VerifyHelper.AreEqualObjects(y, updateStatus)), "JobDb"));
             mock.Setup(dataAccess => dataAccess.SaveData<dynamic>("dbo.spUpdateWikiJobRequestTimePreStarted", It.Is<object>(y => VerifyHelper.AreEqualObjects(y, updateTimePreStart)), "JobDb"));
@@ -226,7 +222,7 @@ namespace Wikibot.Tests
             mock.Setup(dataAccess => dataAccess.SaveData<dynamic>("dbo.spCreatePages", It.IsAny<List<DataAccess.Objects.Page>>(), "JobDb"));
             mock.Setup(dataAccess => dataAccess.SaveData<dynamic>("dbo.spUpdatePagesForWikiJobRequest", It.Is<object>(y => VerifyHelper.AreEqualObjects(y, updatePages)), "JobDb"));
             var result = mock.Object.LoadDataComplex<WikiJobRequest, DataAccess.Objects.Page, dynamic>("dbo.spGetWikiJobRequestById", ldcParams, "JobDb", types, MapPageToWikiJobRequest, "PageID");
-            mock.Verify(dataAccess => dataAccess.LoadDataComplex<WikiJobRequest, DataAccess.Objects.Page, dynamic >("dbo.spGetWikiJobRequestById", ldcParams, "JobDb", types, MapPageToWikiJobRequest, "PageID"));
+            mock.Verify(dataAccess => dataAccess.LoadDataComplex<WikiJobRequest, DataAccess.Objects.Page, dynamic>("dbo.spGetWikiJobRequestById", ldcParams, "JobDb", types, MapPageToWikiJobRequest, "PageID"));
 
             return mock;
 
@@ -279,7 +275,8 @@ namespace Wikibot.Tests
 
         public static object GetUpdatePageParams(List<DataAccess.Objects.Page> pageList, long id)
         {
-            return new {
+            return new
+            {
                 pages = pageList.ToList().ToDataSet().Tables[0].AsTableValuedParameter("PageUDT"),
                 jobid = id
             };
@@ -287,12 +284,12 @@ namespace Wikibot.Tests
 
         public static RequestData GetRequestData(IDataAccess dataAccess)
         {
-            if(dataAccess == null)
+            if (dataAccess == null)
             {
                 dataAccess = GetMockDataAccess().Object;
             }
             var requestData = new RequestData(dataAccess);
-            
+
             return requestData;
         }
 
@@ -323,6 +320,5 @@ namespace Wikibot.Tests
 
             return tempRequest;
         }
-
     }
 }

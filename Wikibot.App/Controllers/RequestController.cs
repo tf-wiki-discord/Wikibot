@@ -20,8 +20,8 @@ namespace Wikibot.App.Controllers
     {
         private RequestData _requestData;
         private string diffFileNamePattern = "";
-        private IWikiJobRetriever _jobRetriever;
-        public RequestController(IDataAccess dataAccess, IWikiJobRetriever jobRetriever, IConfiguration config)
+        private IWikiRequestRetriever _jobRetriever;
+        public RequestController(IDataAccess dataAccess, IWikiRequestRetriever jobRetriever, IConfiguration config)
         {
             _requestData = new RequestData(dataAccess);
             diffFileNamePattern = config["DiffFileNamePattern"];

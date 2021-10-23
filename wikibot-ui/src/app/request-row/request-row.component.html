@@ -1,9 +1,9 @@
-<td class="request-table-cell">
-    <div><!--</div> class="link" (click)="goToDetails(request.requestId)">-->
+<td class="request-table-cell mobile-hide">
+    <div>
         {{request.id}}
     </div> 
 </td>
-<td class="request-table-cell">{{request.comment}}</td>
+<td class="request-table-cell mobile-hide">{{request.comment}}</td>
 <td class="request-table-cell">{{request.requestingUsername}}</td>
 <td class="request-table-cell">{{request.submittedDateUTC|date : "MM/dd/yyyy hh:mm:ss"}}</td>
 <td class="request-table-cell">{{request.statusName}}</td>

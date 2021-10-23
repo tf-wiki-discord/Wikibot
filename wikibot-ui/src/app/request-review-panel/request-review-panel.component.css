@@ -2,16 +2,25 @@
     background-color: white;
     height: 100%;
 }
+
+.header{
+    display: inline-block;
+    width: 100%;
+}
+
 .request-review-raw-div{
     border: 2px solid black;
-    height: 15%;
     margin-bottom: 1%;
 }
 
 .request-review-diff-div{
     border: 2px solid black;
     overflow: scroll;
-    height: 65%;
+    height: 90%;
+}
+
+.diff-active{
+    height: 60%;
 }
 
 .request-review-message-div {
@@ -19,6 +28,12 @@
     width: 30%;
     text-align: center;
     margin: auto;
+}
+
+.approve-reject-div{
+    display: flow-root;
+    margin-left: 15%;
+    margin-right: 15%;
 }
 
 .success-message {
@@ -32,51 +47,56 @@
 .request-review-button-div {
     padding: 2%;
     margin: auto;
-    width: 40%;
+    background-color: inherit;
 }
 
 .request-review-button{
-    background-color: cornflowerblue;
-    display: inline;
-    padding: 10px;
+    display: inline-block;
+    padding: 0.25em;
     cursor: pointer;
+    width:6.5em;
+    text-align: center;
 }
 
-.request-review-button:hover{
+.button:hover{
     filter: brightness(50%);
 }
 
 .close-button {
-    float:right
+    float:right;
+    font-size: 1.5em;
+    margin-right: 0.4em;
 }
 
 .approval-button {
-    float: left;
+    background-color: palegreen;
 }
 
 .reject-button {
     float: right;
+    background-color: palevioletred;
 }
 
 .disabled-review-button {
-    background-color: cornflowerblue;
-    display: inline;
     padding: 10px;
     cursor: pointer;
     opacity: 70%;
 }
 
 .float-button{
-    position:fixed;
-    z-index: 2;
-    top: 400px;
-    background-color: cornflowerblue;
+        background-color: cornflowerblue;
+}
+
+.button{
+    cursor: pointer;
+    border-radius: 0.25em; 
+   
 }
 .request-review-prev-button{
-    left: 7%;
+    display: inline;
 }
 .request-review-next-button{
-    right: 8%;
+    float: right;
 }
 
 /*
@@ -187,4 +207,41 @@ table.diff td div {
         instead of text overflowing or widening
     */
     overflow: auto;
+}
+
+.collapsible {
+    background-color: #fff;
+    border: cornflowerblue solid;
+    color: #000;
+    cursor: pointer;
+    padding: 0.2em;
+    width: 100%;
+    text-align: left;
+    outline: none;
+    font-size: 15px;
+  }
+
+  /* Add a background color to the button if it is clicked on (add the .active class with JS), and when you move the mouse over it (hover) */
+  .active {
+      background-color:cornflowerblue;
+      border: 2px solid grey;
+  }
+
+  .collapsible:after {
+    content: "\2796"; /* Unicode character for "minus" sign (-) */
+    font-size: 13px;
+    color: white;
+    float: right;
+    margin-left: 5px;
+  }
+  
+  .active:after {
+    content: '\02795'; /* Unicode character for "plus" sign (+) */
+    
+  }
+  
+  @media only screen and (max-height: 465px) {
+  .diff-active{
+    height: 50%;
+  }
 }

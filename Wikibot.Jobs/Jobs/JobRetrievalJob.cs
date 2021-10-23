@@ -1,5 +1,4 @@
 using FluentScheduler;
-using Microsoft.AspNetCore.Connections.Features;
 using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
@@ -8,7 +7,6 @@ using System.Linq;
 using System.Net;
 using Wikibot.DataAccess;
 using Wikibot.DataAccess.Objects;
-using Wikibot.Logic.Factories;
 using Wikibot.Logic.JobRetrievers;
 using Wikibot.Logic.Logic;
 using Wikibot.Logic.UserRetrievers;
@@ -18,19 +16,15 @@ namespace Wikibot.Logic.Jobs
     public class JobRetrievalJob : AbstractJob
     {
 
-        private IWikiJobRetriever _jobRetriever;
+        private IWikiRequestRetriever _jobRetriever;
         private IUserRetriever _userRetriever;
-        private IWikiAccessLogic _wikiAccessLogic;
 
-        public JobRetrievalJob(IConfiguration config, Serilog.ILogger log, IWikiJobRetriever jobRetriever, IWikiAccessLogic wikiAccessLogic, RequestData jobData )
+        public JobRetrievalJob(IConfiguration config, Serilog.ILogger log, IWikiRequestRetriever jobRetriever, IUserRetriever userRetriever, RequestData jobData )
         {
             Configuration = config;
             Log = log;
             _jobRetriever = jobRetriever;
-            var wikiConfig = Configuration.GetSection("WikiLogin");
-            _wikiAccessLogic = wikiAccessLogic;
-            var wiki = _wikiAccessLogic.GetLoggedInWiki(wikiConfig);
-            _userRetriever = new TFWikiUserRetriever(wiki);
+            _userRetriever = userRetriever;
 
             JobData = jobData;
         }
@@ -84,7 +78,7 @@ namespace Wikibot.Logic.Jobs
                                 Log.Information("Scheduling request");
                                 //Schedule jobs in 10 minute intervals
                                 //How to deal with potential page edit overlaps? -> Check page lists and id overlaps;
-                                var job = WikiJobFactory.GetWikiJob(request, Log, _wikiAccessLogic, Configuration, JobData, _jobRetriever );
+                                var job = _jobRetriever.GetJobForRequest(request);
                                 JobManager.AddJob(() => job.Execute(), (s) => s.ToRunOnceIn(runin + offset).Minutes());
                                 offset = offset + 10;
                             }

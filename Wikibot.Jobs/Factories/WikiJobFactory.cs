@@ -10,7 +10,7 @@ namespace Wikibot.Logic.Factories
 {
     public static class WikiJobFactory
     {
-        public static WikiJob GetWikiJob(WikiJobRequest request, Serilog.ILogger log, IWikiAccessLogic wikiAccessLogic, IConfiguration config, RequestData jobData, IWikiJobRetriever retriever)
+        public static WikiJob GetWikiJob(WikiJobRequest request, Serilog.ILogger log, IWikiAccessLogic wikiAccessLogic, IConfiguration config, RequestData jobData, IWikiRequestRetriever retriever)
         {
 
             WikiJob job;

@@ -27,7 +27,7 @@ namespace Wikibot.Logic.Jobs
         public ContinuityLinkFixJob()
         { }
 
-        public ContinuityLinkFixJob(Serilog.ILogger log, IWikiAccessLogic wikiAccessLogic, IWikiJobRetriever retriever, RequestData jobData, int throttleSpeedInSeconds)
+        public ContinuityLinkFixJob(Serilog.ILogger log, IWikiAccessLogic wikiAccessLogic, IWikiRequestRetriever retriever, RequestData jobData, int throttleSpeedInSeconds)
         {
             Log = log;
             _wikiAccessLogic = wikiAccessLogic;
@@ -45,7 +45,7 @@ namespace Wikibot.Logic.Jobs
             {
                 using (var client = new WikiClient())
                 {
-                    var site = _wikiAccessLogic.GetLoggedInWikiSite(WikiConfig, client, Log);
+                    var site = _wikiAccessLogic.GetLoggedInWikiSite(client);
                     var parser = new WikitextParser();
                     var wikiText = parser.Parse(FromText);
                     var fromLinkTarget = wikiText.Lines.SelectMany(x => x.EnumDescendants().OfType<WikiLink>()).FirstOrDefault().Target.ToPlainText();
@@ -157,7 +157,7 @@ namespace Wikibot.Logic.Jobs
                             {
                                 Log.Information("Applying replacement for page {PageName}", page.Title);
                                 var editMessage = $"{WikiConfig["Username"]} Text Replacement {FromText} => {ToText}";
-                                ((TFWikiJobRetriever)Retriever).UpdatePageContent(afterContent, editMessage, page).Wait();
+                                ((TFWikRequestRetriever)Retriever).UpdatePageContent(afterContent, editMessage, page).Wait();
                             }
                         }
                    

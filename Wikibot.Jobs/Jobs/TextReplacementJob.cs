@@ -26,7 +26,7 @@ namespace Wikibot.Logic.Jobs
         public TextReplacementJob()
         { }
 
-        public TextReplacementJob(Serilog.ILogger log, IWikiAccessLogic wikiAccessLogic, IWikiJobRetriever retriever, RequestData jobData, int throttleSpeedInSeconds)
+        public TextReplacementJob(Serilog.ILogger log, IWikiAccessLogic wikiAccessLogic, IWikiRequestRetriever retriever, RequestData jobData, int throttleSpeedInSeconds)
         {
             Log = log;
             _wikiAccessLogic = wikiAccessLogic;
@@ -44,7 +44,7 @@ namespace Wikibot.Logic.Jobs
 
                 using (WikiClient client = new WikiClient())
                 {   
-                    var site = _wikiAccessLogic.GetLoggedInWikiSite(WikiConfig, client, Log);
+                    var site = _wikiAccessLogic.GetLoggedInWikiSite(client);
 
                     var PageList = GetPageList(site);
 

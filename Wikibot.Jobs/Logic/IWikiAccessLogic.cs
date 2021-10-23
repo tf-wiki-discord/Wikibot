@@ -8,7 +8,7 @@ namespace Wikibot.Logic.Logic
 {
     public interface IWikiAccessLogic
     {
-        Wiki GetLoggedInWiki(IConfigurationSection wikiConfig);
-        WikiSite GetLoggedInWikiSite(IConfigurationSection wikiConfig, WikiClient client, ILogger log);
+        Wiki GetLoggedInWiki();
+        WikiSite GetLoggedInWikiSite(WikiClient client);
     }
 }

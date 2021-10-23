@@ -10,6 +10,7 @@ using Wikibot.DataAccess;
 using Wikibot.Logic.JobRetrievers;
 using Wikibot.Logic.Jobs;
 using Wikibot.Logic.Logic;
+using Wikibot.Logic.UserRetrievers;
 
 namespace Wikibot.App
 {
@@ -19,6 +20,7 @@ namespace Wikibot.App
         {
             var configuration = new ConfigurationBuilder()
                 .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+                .AddUserSecrets("aspnet-Wikibot.App-3FB00538-5AEC-40E7-8DBC-0BF9B37C229B")
                 .Build();
 
             Log.Logger = new LoggerConfiguration()
@@ -34,13 +36,14 @@ namespace Wikibot.App
                     var services = serviceScope.ServiceProvider;
                     var config = services.GetRequiredService<IConfiguration>();
                     var wikiAccessLogic = services.GetRequiredService<IWikiAccessLogic>();
-                    var jobRetriever = services.GetRequiredService<IWikiJobRetriever>();
+                    var userRetriever = services.GetRequiredService<IUserRetriever>();//new TFWikiUserRetriever(wikiAccessLogic);
+                    var jobRetriever = services.GetRequiredService<IWikiRequestRetriever>();
                     var logger = services.GetRequiredService<ILogger>();
                     var dataAccess = services.GetRequiredService<IDataAccess>();
                     var jobData = new RequestData(dataAccess);
 
                     Log.Information("Starting background job retrieval job");
-                    JobManager.AddJob(() => new JobRetrievalJob(config, logger, jobRetriever, wikiAccessLogic, jobData).Execute(), (s) => s.ToRunEvery(15).Minutes());
+                    JobManager.AddJob(() => new JobRetrievalJob(config, logger, jobRetriever, userRetriever, jobData).Execute(), (s) => s.ToRunEvery(15).Minutes());
                 }
                 
                 Log.Information("Application Start");
@@ -66,6 +69,7 @@ namespace Wikibot.App
                     var env = hostingContext.HostingEnvironment;
 
                     config.AddJsonFile("appsettings.json")
+                          //.AddUserSecrets("aspnet-Wikibot.App-3FB00538-5AEC-40E7-8DBC-0BF9B37C229B")
                           .AddJsonFile($"appsettings.{env.EnvironmentName}.json",
                                          optional: true, reloadOnChange: true);
                 })

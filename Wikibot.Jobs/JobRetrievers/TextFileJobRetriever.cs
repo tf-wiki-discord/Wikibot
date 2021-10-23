@@ -10,10 +10,12 @@ using Wikibot.DataAccess;
 using Wikibot.DataAccess.Objects;
 using Wikibot.Logic.Extensions;
 using Wikibot.Logic.Factories;
+using Wikibot.Logic.Jobs;
+using Wikibot.Logic.Logic;
 
 namespace Wikibot.Logic.JobRetrievers
 {
-    public class TextFileJobRetriever : IWikiJobRetriever
+    public class TextFileJobRetriever : IWikiRequestRetriever
     {
         private List<WikiJobRequest> _jobDefinitions;
         private string _pathToTextFile;
@@ -41,7 +43,7 @@ namespace Wikibot.Logic.JobRetrievers
         public async Task<List<WikiJobRequest>> GetNewJobDefinitions()
         {
             var ast = await parseFile();
-            var templates = ast.Lines.SelectMany(x=> x.EnumDescendants().OfType<Template>());
+            var templates = ast.EnumDescendants().OfType<Template>();
             var jobs = templates.Select(template => WikiJobRequestFactory.GetWikiJobRequest(JobType.TextReplacementJob, GetTimeZone(), template));
             return jobs.ToList();
         }
@@ -51,7 +53,7 @@ namespace Wikibot.Logic.JobRetrievers
             var wikiText = parseFile().Result;
             foreach(WikiJobRequest job in jobs)
             {
-                var templates = wikiText.Lines.SelectMany(x => x.EnumDescendants().OfType<Template>());
+                var templates = wikiText.EnumDescendants().OfType<Template>();
                 var singletemplate = templates.FirstOrDefault(x => x.Name.ToPlainText().Equals(_botRequestTemplate) && x.EqualsJob(job));
                 if (singletemplate != null)
                 {
@@ -72,5 +74,9 @@ namespace Wikibot.Logic.JobRetrievers
             return TimeZoneInfo.FindSystemTimeZoneById(_config["RequestTimezoneID"]);
         }
 
+        public WikiJob GetJobForRequest(WikiJobRequest request)
+        {
+            return WikiJobFactory.GetWikiJob(request, null, new WikiAccessLogic(_config, null), _config, null, this);
+        }
     }
 }

@@ -13,6 +13,7 @@ import { HttpErrorInterceptor } from './http-error.interceptor';
 import { SpinnerComponent } from './spinner/spinner.component';
 import { SpinnerOverlayComponent } from './spinner-overlay/spinner-overlay.component';
 import { CommonModule } from '@angular/common';
+import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 
 @NgModule({
   declarations: [
@@ -29,7 +30,8 @@ import { CommonModule } from '@angular/common';
     AppRoutingModule,
     OverlayModule,
     HttpClientModule,
-    CommonModule
+    CommonModule,
+    FontAwesomeModule
   ],
   providers: [
     {

@@ -17,9 +17,15 @@ namespace Wikibot.DataAccess
         }
         public string GetConnectionString(string name)
         {
-            return new ConfigurationBuilder()
-                .AddConfiguration(_config)
-                .Build().GetConnectionString(name);
+            var configBuilder = new ConfigurationBuilder()
+                 .AddConfiguration(_config).Build();
+           
+            var connectionString = configBuilder.GetConnectionString(name); 
+            var builder = new SqlConnectionStringBuilder(
+            connectionString);
+            
+            builder.Password = configBuilder.GetSection("ApplicationDB")["DbPassword"];
+            return builder.ConnectionString;
         }
 
         public List<T> LoadData<T, U>(string storedProcedure, U parameters, string connectionStringName)

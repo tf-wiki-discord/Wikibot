@@ -126,6 +126,6 @@ namespace Wikibot.Logic.Jobs
             Retriever.UpdateRequests(new List<WikiJobRequest> { Request });
         }
 
-        public IWikiJobRetriever Retriever;
+        public IWikiRequestRetriever Retriever;
     }
 }

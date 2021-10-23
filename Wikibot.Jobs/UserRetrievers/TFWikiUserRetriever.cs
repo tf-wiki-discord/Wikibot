@@ -2,15 +2,18 @@
 using System.Collections.Generic;
 using System.Linq;
 using Wikibot.DataAccess;
+using Wikibot.Logic.Logic;
 
 namespace Wikibot.Logic.UserRetrievers
 {
     public class TFWikiUserRetriever : IUserRetriever
     {
         private Wiki _wiki;
-        public TFWikiUserRetriever(Wiki wiki)
+        private IWikiAccessLogic _accessLogic;
+        public TFWikiUserRetriever(IWikiAccessLogic accessLogic)
         {
-            _wiki = wiki;
+            _accessLogic = accessLogic;
+            _wiki = accessLogic.GetLoggedInWiki();
         }
         public List<User> GetAutoApprovedUsers()
         {

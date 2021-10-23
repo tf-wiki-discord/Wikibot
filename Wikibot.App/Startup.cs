@@ -24,6 +24,7 @@ using Wikibot.App.Models;
 using Wikibot.DataAccess;
 using Wikibot.Logic.JobRetrievers;
 using Wikibot.Logic.Logic;
+using Wikibot.Logic.UserRetrievers;
 
 namespace Wikibot.App
 {
@@ -132,8 +133,9 @@ namespace Wikibot.App
 
             //services.AddTransient<IEmailSender, EmailSender>();
             services.AddTransient<IWikiAccessLogic, WikiAccessLogic>();
-            services.AddTransient<IWikiJobRetriever, TFWikiJobRetriever>();
+            services.AddTransient<IWikiRequestRetriever, TFWikRequestRetriever>();
             services.AddTransient<IDataAccess, SqlDataAccess>();
+            services.AddTransient<IUserRetriever, TFWikiUserRetriever>();
 
             services.AddSwaggerGen(options =>
             {

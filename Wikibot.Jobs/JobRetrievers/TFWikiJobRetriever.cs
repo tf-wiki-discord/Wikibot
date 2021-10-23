@@ -10,17 +10,19 @@ using Wikibot.DataAccess;
 using Wikibot.DataAccess.Objects;
 using Wikibot.Logic.Extensions;
 using Wikibot.Logic.Factories;
+using Wikibot.Logic.Jobs;
 using Wikibot.Logic.Logic;
 using WikiClientLibrary.Client;
 using WikiClientLibrary.Pages;
 
 namespace Wikibot.Logic.JobRetrievers
 {
-    public class TFWikiJobRetriever: IWikiJobRetriever
+    public class TFWikRequestRetriever: IWikiRequestRetriever
     {
         private List<WikiJobRequest> _jobDefinitions;
         private IConfigurationSection _wikiLoginConfig;
         private IConfigurationSection _wikiEditMessages;
+        private IConfiguration _config;
         private string _timeZoneID;
         private ILogger _log;
         private IWikiAccessLogic _wikiAccessLogic;
@@ -37,15 +39,16 @@ namespace Wikibot.Logic.JobRetrievers
             }
         }
 
-        public TFWikiJobRetriever(IConfiguration configuration, ILogger log, IWikiAccessLogic wikiAccessLogic, IDataAccess dataAccess)
+        public TFWikRequestRetriever(IConfiguration configuration, ILogger log, IDataAccess dataAccess)
         {
+            _config = configuration;
             _wikiLoginConfig = configuration.GetSection("WikiLogin");
             _wikiEditMessages = configuration.GetSection("WikiEditMessages");
             _wikiRequestPage = configuration["WikiRequestPage"];
             _botRequestTemplate = configuration["BotRequestTemplate"];
             _timeZoneID = configuration["RequestTimezoneID"];
             _log = log;
-            _wikiAccessLogic = wikiAccessLogic;
+            _wikiAccessLogic = new WikiAccessLogic(configuration, log);
             _database = new RequestData(dataAccess);
         }
 
@@ -61,7 +64,7 @@ namespace Wikibot.Logic.JobRetrievers
                 try
                 {
                     _log.Information($"Logging into Wiki");
-                    var site = _wikiAccessLogic.GetLoggedInWikiSite(_wikiLoginConfig, client, _log);
+                    var site = _wikiAccessLogic.GetLoggedInWikiSite(client);
                     var page = new WikiPage(site, _wikiRequestPage);
 
                     _log.Information($"Fetching content from job request page {page.Title}");
@@ -71,7 +74,7 @@ namespace Wikibot.Logic.JobRetrievers
                     if ((page?.Content ?? "").Length > 1)
                     {
                         var ast = new WikitextParser().Parse(page?.Content);
-                        var templates = ast.Lines.First().EnumDescendants().OfType<Template>();
+                        var templates = ast.EnumDescendants().OfType<Template>();
 
                         _log.Information("Building jobs.");
                         jobs = templates.Select(template => WikiJobRequestFactory.GetWikiJobRequest((JobType)Enum.Parse(typeof(JobType), template.Arguments.Single(arg => arg.Name.ToPlainText() == "type").Value.ToPlainText().Replace(" ", "") + "Job"), GetTimeZone(), template));
@@ -103,7 +106,7 @@ namespace Wikibot.Logic.JobRetrievers
                 try
                 {
                     // You can create multiple WikiSite instances on the same WikiClient to share the state.
-                    var site = _wikiAccessLogic.GetLoggedInWikiSite(_wikiLoginConfig, client, _log);
+                    var site = _wikiAccessLogic.GetLoggedInWikiSite(client);
 
                     var page = new WikiPage(site, _wikiRequestPage);
 
@@ -120,7 +123,7 @@ namespace Wikibot.Logic.JobRetrievers
                     {
                         _log.Information($"Processing request ID: {request.ID} with raw {request.RawRequest}");
                         //Find corresponding template in the page content
-                        var templates = wikiText.Lines.SelectMany(x => x.EnumDescendants().OfType<Template>());
+                        var templates = wikiText.EnumDescendants().OfType<Template>();
                         var requestTemplates = templates.Where(template => template.Name.ToPlainText().Equals(_botRequestTemplate));
                         _log.Information($"{requestTemplates.ToList().Count} templates found for template {_botRequestTemplate}");
                         _log.Information($"Template id: {requestTemplates.First().Arguments.SingleOrDefault(arg => arg.Name.ToPlainText().Equals("id"))}");
@@ -165,6 +168,11 @@ namespace Wikibot.Logic.JobRetrievers
             page.Content = content;
             await page.UpdateContentAsync(message);
         }
+
+        public WikiJob GetJobForRequest(WikiJobRequest request)
+        {
+            return WikiJobFactory.GetWikiJob(request, _log, _wikiAccessLogic, _config, _database, this);
+        } 
 
         private TimeZoneInfo GetTimeZone()
         {

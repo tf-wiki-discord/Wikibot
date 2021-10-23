@@ -1,41 +1,60 @@
 
 <div class="request-review-main-div">
-<div id="header">
-    <div *ngIf="error" class="request-review-message-div error-message">
-        {{error_message}}
+    <div id="header" class="header">
+        <div *ngIf="error" class="request-review-message-div error-message">
+            {{error_message}}
+        </div>
+        <div *ngIf="success" class="request-review-message-div success-message">
+            {{success_message}}
+        </div>
+        <div class="close-button link" (click)="close()">
+            <fa-icon [icon]="faWindowClose"></fa-icon>
+        </div>
     </div>
-    <div *ngIf="success" class="request-review-message-div success-message">
-        {{success_message}}
+    <div>
+        <div class="collapsible" (click)="showDetails = !showDetails" [ngClass]="{'active': !showDetails}">Details:</div>
+        <div class="details"  [hidden] = !showDetails>
+            <div><!--</div> class="link" (click)="goToDetails(request.requestId)">-->
+                ID: {{request.id}}
+            </div> 
+            <div>Comment: {{request.comment}}</div>
+            <div>User: {{request.requestingUsername}}</div>
+            <div>Date Submitted: {{request.submittedDateUTC|date : "MM/dd/yyyy hh:mm:ss"}}</div>
+            <div>Status: {{request.statusName}}</div>
+        </div>
     </div>
-    <div class="close-button link" (click)="close()">
-    Close
+    <div>
+        <div class="collapsible" (click)="showRaw = !showRaw" [ngClass]="{'active': !showRaw}">Raw Request:</div>
+        <div class="request-review-raw-div content" [hidden] = !showRaw >
+            {{request.rawRequest}}
+        </div>
     </div>
-</div>
-
-Raw Request:
-<div class="request-review-raw-div">
-    {{request.rawRequest}}
-</div>
-<div class="request-review-diff-div" *ngIf="lastPage > 0">
-    Diff for {{this.request.diffs[currPage]}} ({{currPage}} of {{this.request.diffs.length}})
-    <div  *ngIf="currDiffHTML$ | async;let diff" innerHTML="{{diff}}">
+    <div *ngIf="lastPage > 0" [ngClass]="{'diff-active': showDiff}">
+        <div class="collapsible" (click)="showDiff = !showDiff" [ngClass]="{'active': !showDiff}">
+            Diff for {{this.request.diffs[currPage-1].split("-",3)[2].split(".",2)[0]}} ({{currPage}} of {{this.request.diffs.length}})
+        </div>
+        <div class="request-review-diff-div" *ngIf="currDiffHTML$ | async;let diff" innerHTML="{{diff}}"  [hidden] = !showDiff> 
+        </div>
     </div>
-    <div class="float-button request-review-prev-button" *ngIf="lastPage > 1" (click)="prevPage()">
-        Prev
+    <div class="request-review-button-div">
+        <div class="float-button request-review-prev-button button" *ngIf="lastPage > 1" (click)="prevPage()">
+            <fa-icon [icon]="faAngleLeft"></fa-icon>
+            <span class="prev-button-text">Prev</span>
+        </div>
+        <div class="float-button request-review-next-button button" *ngIf="lastPage > 1" (click)="nextPage()"> 
+            <span class="next-button-text">Next</span> 
+            <fa-icon [icon]="faAngleRight"></fa-icon>
+        </div>
+        <div class="approve-reject-div">
+            <div *ngIf="original_request_status == 'PendingPreApproval'" (click)="preApprove()" [ngClass]="{'button': true, 'request-review-button': (!success && !error), 'disabled-review-button': (success || error), 'approval-button': true}">
+                Pre Approve
+            </div>
+            <div *ngIf="original_request_status == 'PendingApproval'" (click)="Approve()" [ngClass]="{'button': true, 'request-review-button': (!success && !error), 'disabled-review-button': (success || error), 'approval-button': true}">
+                Approve
+            </div>
+            <div [ngClass]="{'button': true, 'request-review-button': (!success && !error), 'disabled-review-button': (success || error), 'reject-button': true, 'approval-button': true}"  (click)="Reject()" >
+                Reject
+            </div>
+        </div>
     </div>
-    <div class="float-button request-review-next-button" *ngIf="lastPage > 1" (click)="nextPage()"> 
-        Next
-    </div>
-</div>
-<div class="request-review-button-div">
-    <div *ngIf="original_request_status == 'PendingPreApproval'" (click)="preApprove()" [ngClass]="{'request-review-button': (!success && !error), 'disabled-review-button': (success || error), 'approval-button': true}">
-        Pre Approve
-    </div>
-    <div *ngIf="original_request_status == 'PendingApproval'" (click)="Approve()" [ngClass]="{'request-review-button': (!success && !error), 'disabled-review-button': (success || error), 'approval-button': true}">
-        Approve
-    </div>
-    <div [ngClass]="{'request-review-button': (!success && !error), 'disabled-review-button': (success || error), 'reject-button': true}"  (click)="Reject()" >
-        Reject
-    </div>
-</div>
 </div>

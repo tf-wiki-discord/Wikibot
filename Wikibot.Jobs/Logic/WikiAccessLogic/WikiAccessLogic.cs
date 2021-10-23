@@ -9,33 +9,41 @@ namespace Wikibot.Logic.Logic
 {
     public class WikiAccessLogic : IWikiAccessLogic
     {
+        private IConfigurationSection _wikiConfig;
+        private ILogger _log;
 
-        public Wiki GetLoggedInWiki(IConfigurationSection wikiConfig)
+        public WikiAccessLogic(IConfiguration config, ILogger log)
         {
-            var url = wikiConfig["APIUrl"];
-            var path = wikiConfig["APIPath"];
+            _wikiConfig = config.GetSection("WikiLogin");
+            _log = log;
+        }
+
+        public Wiki GetLoggedInWiki()
+        {
+            var url = _wikiConfig["APIUrl"];
+            var path = _wikiConfig["APIPath"];
             Wiki wiki = new Wiki("WikiBot", url, path);
 
-            LogIntoWiki(wiki, wikiConfig);
+            LogIntoWiki(wiki);
 
             return wiki;
         }
 
-        public WikiSite GetLoggedInWikiSite(IConfigurationSection wikiConfig, WikiClient client, ILogger log)
+        public WikiSite GetLoggedInWikiSite(WikiClient client)
         {
-            var url = wikiConfig["APIUrl"];
-            var path = wikiConfig["APIPath"];
+            var url = _wikiConfig["APIUrl"];
+            var path = _wikiConfig["APIPath"];
             var uriBuilder = new UriBuilder(url);
             uriBuilder.Path = path;
             var site = new WikiSite(client, uriBuilder.Uri.ToString());
-            LogIntoWikiSite(site, wikiConfig, log);
+            LogIntoWikiSite(site);
             return site;
         }
 
-        private void LogIntoWikiSite(WikiSite site, IConfigurationSection wikiConfig, ILogger log)
+        private void LogIntoWikiSite(WikiSite site)
         {
-            var username = wikiConfig["Username"];
-            var password = wikiConfig["Password"];
+            var username = _wikiConfig["Username"];
+            var password = _wikiConfig["Password"];
 
             // Wait for initialization to complete.
             // Throws error if any.
@@ -46,15 +54,15 @@ namespace Wikibot.Logic.Logic
             }
             catch(Exception ex)
             {
-                log.Error(ex, "Error logging in:");
+                _log.Error(ex, "Error logging in:");
                 throw;
             }
         }
 
-        private void LogIntoWiki(Wiki wiki, IConfigurationSection wikiConfig)
+        private void LogIntoWiki(Wiki wiki)
         {
-            var username = wikiConfig["Username"];
-            var password = wikiConfig["Password"];
+            var username = _wikiConfig["Username"];
+            var password = _wikiConfig["Password"];
 
             var result = wiki.login(username, password);
 
