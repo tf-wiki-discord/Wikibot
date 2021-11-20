@@ -64,7 +64,7 @@ namespace Wikibot.Logic.Jobs
                 //For each new user, pull their userpage. If no welcome template, place template at top of page
                 foreach (string newUserName in newUserNames)
                 {
-                    var page = new WikiPage(wiki, $"User:{newUserName}");
+                    var page = new WikiPage(wiki, $"User_talk:{newUserName}");
                     await page.RefreshAsync(PageQueryOptions.FetchContent
                         | PageQueryOptions.ResolveRedirects);
                     var wikiText = parser.Parse(page.Content ?? "");
