@@ -136,7 +136,7 @@ namespace Wikibot.App
 
             services.AddTransient<IEmailSender, SmtpSender>();
             services.AddTransient<IWikiAccessLogic, WikiAccessLogic>();
-            services.AddTransient<IWikiRequestRetriever, TFWikRequestRetriever>();
+            services.AddTransient<IWikiRequestRetriever, TFWikiRequestRetriever>();
             services.AddTransient<IDataAccess, SqlDataAccess>();
             services.AddTransient<IUserRetriever, TFWikiUserRetriever>();
             services.AddTransient<INotificationService, WikiNotificationService>();

@@ -67,7 +67,9 @@ namespace Wikibot.Tests
             var iConfig = Utilities.GetIConfigurationRoot();
             var logger = Utilities.GetLogger(iConfig, _output);;
             var sqlDataAccess = new SqlDataAccess(iConfig);
-            var retriever = new TFWikRequestRetriever(iConfig, logger, sqlDataAccess);
+            var wikiAccessLogic = new WikiAccessLogic(iConfig, logger);
+            var notifier = Utilities.GetNotificationService(wikiAccessLogic, iConfig);
+            var retriever = new TFWikiRequestRetriever(iConfig, logger, sqlDataAccess, notifier);
             var definitions = retriever.GetNewJobDefinitions().Result;
             Assert.NotNull(definitions);
         }
@@ -81,8 +83,9 @@ namespace Wikibot.Tests
             var wikiAccessLogic = new WikiAccessLogic(iConfig, logger);
             var sqlDataAccess = new SqlDataAccess(iConfig);
             var userRetriever = new TFWikiUserRetriever(wikiAccessLogic, iConfig);
-            var retriever = new TFWikRequestRetriever(iConfig, logger, sqlDataAccess);
             var notifier = Utilities.GetNotificationService(wikiAccessLogic, iConfig);
+            var retriever = new TFWikiRequestRetriever(iConfig, logger, sqlDataAccess, notifier);
+           
             var job = new RequestRetrievalJob(iConfig, logger, retriever, userRetriever, notifier, requestData);
             job.Execute();
         }

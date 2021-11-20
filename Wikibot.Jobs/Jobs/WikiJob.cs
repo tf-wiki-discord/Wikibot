@@ -107,7 +107,6 @@ namespace Wikibot.Logic.Jobs
                 Request.TimePreFinishedUTC = DateTime.UtcNow;
                 Request.Status = JobStatus.PendingApproval;
                 Log.Information("Job ended at {DateTime}", Request.TimePreFinishedUTC);
-                Notifier.SendRequestPreApprovedNotification(this.Request.RequestingUsername, this.Request.Comment, this.Request.JobType.ToString());
                 Notifier.SendNewApprovalNotification(UserRetriever.GetReviewerUsers(), this.Request.RequestingUsername, this.Request.Comment);
             }
             else if (Request.Status == JobStatus.Approved)
