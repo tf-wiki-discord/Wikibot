@@ -168,10 +168,14 @@ namespace Wikibot.DataAccess
                 _requestDictionary = new Dictionary<long, WikiJobRequest>();
             }
 
-            WikiJobRequest tempRequest;
+            WikiJobRequest tempRequest = request;
             if(!_requestDictionary.TryGetValue(request.ID, out tempRequest))
             {
-                _requestDictionary.Add(request.ID, tempRequest = request);
+                _requestDictionary.Add(request.ID, tempRequest);
+            }
+            else
+            {
+                _requestDictionary[request.ID] = tempRequest;
             }
 
             if (page != null)
