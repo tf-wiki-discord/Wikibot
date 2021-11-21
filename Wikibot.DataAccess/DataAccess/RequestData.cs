@@ -74,7 +74,7 @@ namespace Wikibot.DataAccess
             return output.SingleOrDefault();
         }
 
-        public void SaveWikiJobRequest(WikiJobRequest request)
+        public long SaveWikiJobRequest(WikiJobRequest request)
         {
             var p = new DynamicParameters();
             p.Add("@Comment", request.Comment, System.Data.DbType.String);
@@ -93,6 +93,7 @@ namespace Wikibot.DataAccess
             {    
                 new PageData(_database).SavePages(request.Pages, request.ID);
             }
+            return request.ID;
         }
 
         public void UpdateStatus(long requestID, JobStatus status)
@@ -171,11 +172,12 @@ namespace Wikibot.DataAccess
             WikiJobRequest tempRequest = request;
             if(!_requestDictionary.TryGetValue(request.ID, out tempRequest))
             {
-                _requestDictionary.Add(request.ID, tempRequest);
+                _requestDictionary.Add(request.ID, tempRequest = request);
             }
             else
             {
-                _requestDictionary[request.ID] = tempRequest;
+                request.Pages = tempRequest.Pages;
+                _requestDictionary[request.ID] = tempRequest = request;
             }
 
             if (page != null)
