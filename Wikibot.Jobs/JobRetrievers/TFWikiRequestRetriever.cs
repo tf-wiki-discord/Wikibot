@@ -49,6 +49,7 @@ namespace Wikibot.Logic.JobRetrievers
             _log = log;
             _wikiAccessLogic = new WikiAccessLogic(configuration, log);
             _database = new RequestData(dataAccess);
+            _notificationService = notificationService;
         }
 
         public async Task<List<WikiJobRequest>> GetNewJobDefinitions()
