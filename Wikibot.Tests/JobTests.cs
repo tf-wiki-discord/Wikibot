@@ -28,7 +28,8 @@ namespace Wikibot.Tests
             var textFileManager = new TextFileManager();
             var jobRetriever = new TextFileRequestRetriever(iConfig, "WikiJobTest.txt", textFileManager);
             var notifier = Utilities.GetNotificationService(wikiAccessLogic, iConfig);
-            TextReplacementJob job = (TextReplacementJob)WikiJobFactory.GetWikiJob(request, log, wikiAccessLogic, iConfig, notifier, jobData, jobRetriever);
+            var userRetriever = Utilities.GetUserRetriever(iConfig, log);
+            TextReplacementJob job = (TextReplacementJob)WikiJobFactory.GetWikiJob(request, log, wikiAccessLogic, iConfig, notifier, jobData, jobRetriever, userRetriever);
             job.Configuration = iConfig;
             job.Execute();
         }
@@ -45,7 +46,8 @@ namespace Wikibot.Tests
             var textFileManager = new TextFileManager();
             var jobRetriever = new TextFileRequestRetriever(iConfig, "WikiJobTest.txt", textFileManager);
             var notifier = Utilities.GetNotificationService(wikiAccessLogic, iConfig);
-            LinkFixJob job = (LinkFixJob)WikiJobFactory.GetWikiJob(request, log, wikiAccessLogic, iConfig, notifier, jobData, jobRetriever);
+            var userRetriever = Utilities.GetUserRetriever(iConfig, log);
+            LinkFixJob job = (LinkFixJob)WikiJobFactory.GetWikiJob(request, log, wikiAccessLogic, iConfig, notifier, jobData, jobRetriever, userRetriever);
             job.Configuration = iConfig;
             job.Execute();
         }
@@ -62,7 +64,8 @@ namespace Wikibot.Tests
             var textFileManager = new TextFileManager();
             var jobRetriever = new TextFileRequestRetriever(iConfig, "WikiJobTest.txt", textFileManager);
             var notifier = Utilities.GetNotificationService(wikiAccessLogic, iConfig);
-            LinkFixJob job = (LinkFixJob)WikiJobFactory.GetWikiJob(request, log, wikiAccessLogic, iConfig, notifier, jobData, jobRetriever);
+            var userRetriever = Utilities.GetUserRetriever(iConfig, log);
+            LinkFixJob job = (LinkFixJob)WikiJobFactory.GetWikiJob(request, log, wikiAccessLogic, iConfig, notifier, jobData, jobRetriever, userRetriever);
             job.Configuration = iConfig;
             job.Execute();
         }
@@ -79,7 +82,8 @@ namespace Wikibot.Tests
             var textFileManager = new TextFileManager();
             var jobRetriever = new TextFileRequestRetriever(iConfig, "WikiJobTest.txt", textFileManager);
             var notifier = Utilities.GetNotificationService(wikiAccessLogic, iConfig);
-            ContinuityLinkFixJob job = (ContinuityLinkFixJob)WikiJobFactory.GetWikiJob(request, log, wikiAccessLogic, iConfig, notifier, jobData, jobRetriever);
+            var userRetriever = Utilities.GetUserRetriever(iConfig, log);
+            ContinuityLinkFixJob job = (ContinuityLinkFixJob)WikiJobFactory.GetWikiJob(request, log, wikiAccessLogic, iConfig, notifier, jobData, jobRetriever, userRetriever);
             job.Configuration = iConfig;
             job.Execute();
         }
@@ -96,7 +100,8 @@ namespace Wikibot.Tests
             var textFileManager = new TextFileManager();
             var jobRetriever = new TextFileRequestRetriever(iConfig, "WikiJobTest.txt", textFileManager);
             var notifier = Utilities.GetNotificationService(wikiAccessLogic, iConfig);
-            LinkFixJob job = (LinkFixJob)WikiJobFactory.GetWikiJob(request, log, wikiAccessLogic, iConfig, notifier, jobData, jobRetriever);
+            var userRetriever = Utilities.GetUserRetriever(iConfig, log);
+            LinkFixJob job = (LinkFixJob)WikiJobFactory.GetWikiJob(request, log, wikiAccessLogic, iConfig, notifier, jobData, jobRetriever, userRetriever);
             job.Configuration = iConfig;
             job.Execute();
         }

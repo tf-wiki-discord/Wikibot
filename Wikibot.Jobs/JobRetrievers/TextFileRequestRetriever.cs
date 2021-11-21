@@ -75,7 +75,7 @@ namespace Wikibot.Logic.JobRetrievers
 
         public WikiJob GetJobForRequest(WikiJobRequest request)
         {
-            return WikiJobFactory.GetWikiJob(request, null, new WikiAccessLogic(_config, null), _config, null, null, this);
+            return WikiJobFactory.GetWikiJob(request, null, new WikiAccessLogic(_config, null), _config, null, null, this, null);
         }
     }
 }

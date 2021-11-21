@@ -12,6 +12,7 @@ using Wikibot.Logic.Extensions;
 using Wikibot.Logic.Factories;
 using Wikibot.Logic.Jobs;
 using Wikibot.Logic.Logic;
+using Wikibot.Logic.UserRetrievers;
 using WikiClientLibrary.Client;
 using WikiClientLibrary.Pages;
 
@@ -29,6 +30,7 @@ namespace Wikibot.Logic.JobRetrievers
         private string _wikiRequestPage;
         private string _botRequestTemplate;
         private INotificationService _notificationService;
+        private IUserRetriever _userRetriever;
 
         public List<WikiJobRequest> RequestDefinitions
         {
@@ -40,7 +42,7 @@ namespace Wikibot.Logic.JobRetrievers
             }
         }
 
-        public TFWikiRequestRetriever(IConfiguration configuration, ILogger log, IDataAccess dataAccess, INotificationService notificationService)
+        public TFWikiRequestRetriever(IConfiguration configuration, ILogger log, IDataAccess dataAccess, INotificationService notificationService, IUserRetriever userRetriever)
         {
             _config = configuration;
             _wikiRequestPage = configuration["WikiRequestPage"];
@@ -50,6 +52,7 @@ namespace Wikibot.Logic.JobRetrievers
             _wikiAccessLogic = new WikiAccessLogic(configuration, log);
             _database = new RequestData(dataAccess);
             _notificationService = notificationService;
+            _userRetriever = userRetriever;
         }
 
         public async Task<List<WikiJobRequest>> GetNewJobDefinitions()
@@ -171,7 +174,7 @@ namespace Wikibot.Logic.JobRetrievers
 
         public WikiJob GetJobForRequest(WikiJobRequest request)
         {
-            return WikiJobFactory.GetWikiJob(request, _log, _wikiAccessLogic, _config, _notificationService, _database, this);
+            return WikiJobFactory.GetWikiJob(request, _log, _wikiAccessLogic, _config, _notificationService, _database, this, _userRetriever);
         } 
 
         private TimeZoneInfo GetTimeZone()

@@ -71,6 +71,10 @@ namespace Wikibot.Logic.Jobs
                     if (wikiText.ToString().Length <= 1 || !wikiText.EnumDescendants().OfType<Template>().Any(template => template.Name.Equals("welcome")))
                     {
                         Log.Information($"Welcoming {newUserName}");
+                        if(wikiText == null)
+                        {
+                            wikiText = parser.Parse("");
+                        }
                         wikiText.InsertBefore(welcomeTemplate);
                         page.Content = wikiText.ToString();
                         if (!unitTest)

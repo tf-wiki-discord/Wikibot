@@ -10,6 +10,7 @@ using Wikibot.DataAccess.Objects;
 using Wikibot.Logic.Extensions;
 using Wikibot.Logic.JobRetrievers;
 using Wikibot.Logic.Logic;
+using Wikibot.Logic.UserRetrievers;
 using WikiClientLibrary.Client;
 using WikiClientLibrary.Pages;
 using WikiClientLibrary.Sites;
@@ -26,7 +27,7 @@ namespace Wikibot.Logic.Jobs
         public TextReplacementJob()
         { }
 
-        public TextReplacementJob(Serilog.ILogger log, IWikiAccessLogic wikiAccessLogic, IWikiRequestRetriever retriever, INotificationService notificationService, RequestData jobData, int throttleSpeedInSeconds)
+        public TextReplacementJob(Serilog.ILogger log, IWikiAccessLogic wikiAccessLogic, IWikiRequestRetriever retriever, INotificationService notificationService, IUserRetriever userRetriever, RequestData jobData, int throttleSpeedInSeconds)
         {
             Log = log;
             _wikiAccessLogic = wikiAccessLogic;
@@ -34,6 +35,7 @@ namespace Wikibot.Logic.Jobs
             _throttleSpeedInSeconds = throttleSpeedInSeconds;
             Retriever = retriever;
             Notifier = notificationService;
+            UserRetriever = userRetriever;
         }
 
         public override void Execute()
