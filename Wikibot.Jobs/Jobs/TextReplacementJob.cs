@@ -1,9 +1,11 @@
 ﻿using MwParserFromScratch;
+using MwParserFromScratch.Nodes;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Text;
 using System.Threading;
 using Wikibot.DataAccess;
 using Wikibot.DataAccess.Objects;
@@ -48,8 +50,35 @@ namespace Wikibot.Logic.Jobs
                 using (WikiClient client = new WikiClient())
                 {   
                     var site = _wikiAccessLogic.GetLoggedInWikiSite(client);
+                    var parser = new WikitextParser();
+                    var wikiText = parser.Parse(FromText);
+                    var searchText = new StringBuilder().Append('"').Append(wikiText.ToPlainText()).Append('"').ToString();
+                    var wikiLinks = wikiText.EnumDescendants().OfType<WikiLink>();
+                    var templates = wikiText.EnumDescendants().OfType<Template>();
+                    var backLinks = new List<WikiPage>();
+                    var TPbacklinks = new List<WikiPage>();
 
-                    var PageList = GetPageList(site);
+                    if (wikiLinks.Any())
+                    {
+                        foreach (WikiLink link in wikiLinks)
+                        {
+                            if (!backLinks.Any())
+                            {
+                                backLinks.AddRange(GetBackLinksPageList(site, link.Target.ToPlainText()));
+                            }
+                            else
+                            {
+                                backLinks = backLinks.Intersect(GetBackLinksPageList(site, link.Target.ToPlainText())).ToList();
+                            }
+                        }
+                    }
+
+                    var PageList = SearchPageText(site, searchText);
+
+                    if (backLinks.Any())
+                    {
+                        PageList = PageList.Intersect(backLinks);
+                    }
 
                     string filename = "";
                     string folderName = Request.ID.ToString();
@@ -62,26 +91,28 @@ namespace Wikibot.Logic.Jobs
 
                         var beforeContent = page.Content;
                         var afterContent = page.Content.Replace(FromText, ToText);
-
-                        if (Request.Status != JobStatus.Approved) //Create diffs for approval
+                        if (!afterContent.Equals(beforeContent))
                         {
-                            Log.Information("Generating diff for page {PageName}", page.Title);
-                            var folderPath = Path.Combine(Configuration["DiffDirectory"], folderName);
-                            if (!Directory.Exists(folderPath))
+                            if (Request.Status != JobStatus.Approved) //Create diffs for approval
                             {
-                                Directory.CreateDirectory(folderPath);
+                                Log.Information("Generating diff for page {PageName}", page.Title);
+                                var folderPath = Path.Combine(Configuration["DiffDirectory"], folderName);
+                                if (!Directory.Exists(folderPath))
+                                {
+                                    Directory.CreateDirectory(folderPath);
+                                }
+
+                                Utilities.GenerateAndSaveDiff(beforeContent, afterContent, page.Title, Request.ID, Configuration["DiffDirectory"], folderName);
+
+                                JobData.SaveWikiJobRequest(Request); //Save page list                        
                             }
-
-                            Utilities.GenerateAndSaveDiff(beforeContent, afterContent, page.Title, Request.ID, Configuration["DiffDirectory"], folderName);
-
-                            JobData.SaveWikiJobRequest(Request); //Save page list                        
+                            else //Apply changes
+                            {
+                                Log.Information("Applying replacement for page {PageName}", page.Title);
+                                var editMessage = $"{WikiConfig["Username"]} Text Replacement {FromText} => {ToText}";
+                                UpdatePageContentWithMessage(page, afterContent, editMessage);
+                            }
                         }
-                        else //Apply changes
-                        {
-                            Log.Information("Applying replacement for page {PageName}", page.Title);
-                            var editMessage = $"{WikiConfig["Username"]} Text Replacement {FromText} => {ToText}";
-                            UpdatePageContentWithMessage(page, afterContent, editMessage);
-                        }      
                         Thread.Sleep(1000 * _throttleSpeedInSeconds);
                     }
                     Retriever.UpdateRequests(new List<WikiJobRequest> { Request });
@@ -99,16 +130,31 @@ namespace Wikibot.Logic.Jobs
             }
         }
 
-        private IEnumerable<WikiPage> GetPageList(WikiSite site)
+        private IEnumerable<WikiPage> SearchPageText(WikiSite site, string searchText)
         {
             if (Request.Pages == null || Request.Pages.Count == 0)
             {
                 Log.Information("Searching for relevant pages for job {JobID}", Request.ID);
                 //Search for relevant pages
-                Request.Pages = site.Search(FromText, 0).Result.Select(x => new Page { PageID = 0, Name = x.Title }).ToList(); //Search Main namespace by default
+                Request.Pages = site.Search(searchText, 0).Result.Select(x => new Page { PageID = 0, Name = x.Title }).ToList(); //Search Main namespace by default
             }
 
             return Request.Pages.Select(page => new WikiPage(site, page.Name));
+        }
+
+        private IEnumerable<WikiPage> GetBackLinksPageList(WikiSite site, string pageTitle)
+        {
+            Log.Information("Searching for relevant pages for job {JobID}", Request.ID);
+            var linkList = new List<WikiSiteExtension.SearchResultEntry>();
+            //Search for relevant pages
+            if (Request.Pages == null || Request.Pages.Count == 0)
+            {
+                linkList = site.BackLinks(pageTitle).Result.ToList();
+                Request.Pages = linkList.Select(link => new Page(0, link.Title)).ToList();
+            }
+
+            return linkList.Select(link => new WikiPage(site, link.Title));
+
         }
 
         private void UpdatePageContentWithMessage(WikiPage page, string content, string editMessage)
