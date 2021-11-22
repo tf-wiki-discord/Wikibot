@@ -38,6 +38,7 @@ namespace Wikibot.DataAccess
                 SortColumn = sortColumn
             };
             Type[] types = new Type[] { typeof(WikiJobRequest), typeof(Page) };
+            _requestDictionary = null;
 
             var output = _database.LoadDataComplex<WikiJobRequest, Page, dynamic>("dbo.spGetWikiJobRequests", p, "JobDb", types, MapPageToWikiJobRequest, "PageId");
 
@@ -54,6 +55,7 @@ namespace Wikibot.DataAccess
                 SortColumn = sortColumn
             };
             Type[] types = new Type[] { typeof(WikiJobRequest), typeof(Page) };
+            _requestDictionary = null;
 
             var output = _database.LoadDataComplex<WikiJobRequest, Page, dynamic>("dbo.spGetWikiJobRequestsForApproval", p, "JobDb", types, MapPageToWikiJobRequest, "PageId");
 
@@ -70,6 +72,7 @@ namespace Wikibot.DataAccess
             Type[] types = new Type[] { typeof(WikiJobRequest), typeof(Page) };
 
             var output = _database.LoadDataComplex<WikiJobRequest, Page, dynamic>("dbo.spGetWikiJobRequestById", p, "JobDb", types, MapPageToWikiJobRequest, "PageId");
+            _requestDictionary = null;
 
             return output.SingleOrDefault();
         }
@@ -169,15 +172,10 @@ namespace Wikibot.DataAccess
                 _requestDictionary = new Dictionary<long, WikiJobRequest>();
             }
 
-            WikiJobRequest tempRequest = request;
+            WikiJobRequest tempRequest;
             if(!_requestDictionary.TryGetValue(request.ID, out tempRequest))
             {
                 _requestDictionary.Add(request.ID, tempRequest = request);
-            }
-            else
-            {
-                request.Pages = tempRequest.Pages;
-                _requestDictionary[request.ID] = tempRequest = request;
             }
 
             if (page != null)
