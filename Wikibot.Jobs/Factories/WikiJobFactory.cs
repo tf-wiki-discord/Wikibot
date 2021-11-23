@@ -21,7 +21,7 @@ namespace Wikibot.Logic.Factories
             switch (request.JobType)
             {
                 case JobType.TextReplacementJob:
-                    job = new TextReplacementJob(log, wikiAccessLogic, retriever, notificationService, userRetriever, jobData, throttleSpeedInSeconds);
+                    job = new TextReplacementJob(config, log, wikiAccessLogic, retriever, notificationService, userRetriever, jobData, throttleSpeedInSeconds);
                     break;
                 case JobType.LinkFixJob:
                     job = new LinkFixJob(log, wikiAccessLogic, retriever, notificationService, userRetriever, jobData, throttleSpeedInSeconds);

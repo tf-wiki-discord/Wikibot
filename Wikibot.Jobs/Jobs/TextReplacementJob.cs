@@ -1,4 +1,5 @@
-﻿using MwParserFromScratch;
+﻿using Microsoft.Extensions.Configuration;
+using MwParserFromScratch;
 using MwParserFromScratch.Nodes;
 using System;
 using System.Collections.Generic;
@@ -25,11 +26,12 @@ namespace Wikibot.Logic.Jobs
 
         private IWikiAccessLogic _wikiAccessLogic;
         private int _throttleSpeedInSeconds;
+        private string _requestPickupPage;
 
         public TextReplacementJob()
         { }
 
-        public TextReplacementJob(Serilog.ILogger log, IWikiAccessLogic wikiAccessLogic, IWikiRequestRetriever retriever, INotificationService notificationService, IUserRetriever userRetriever, RequestData jobData, int throttleSpeedInSeconds)
+        public TextReplacementJob(IConfiguration config, Serilog.ILogger log, IWikiAccessLogic wikiAccessLogic, IWikiRequestRetriever retriever, INotificationService notificationService, IUserRetriever userRetriever, RequestData jobData, int throttleSpeedInSeconds)
         {
             Log = log;
             _wikiAccessLogic = wikiAccessLogic;
@@ -38,6 +40,7 @@ namespace Wikibot.Logic.Jobs
             Retriever = retriever;
             Notifier = notificationService;
             UserRetriever = userRetriever;
+            _requestPickupPage = config.GetValue<string>("WikiRequestPage");
         }
 
         public override void Execute()
@@ -82,6 +85,7 @@ namespace Wikibot.Logic.Jobs
 
                     string filename = "";
                     string folderName = Request.ID.ToString();
+                    List<WikiPage> pagesToRemove = new List<WikiPage>();
 
                     foreach (WikiPage page in PageList)
                     {
@@ -91,7 +95,7 @@ namespace Wikibot.Logic.Jobs
 
                         var beforeContent = page.Content;
                         var afterContent = page.Content.Replace(FromText, ToText);
-                        if (!afterContent.Equals(beforeContent))
+                        if (!afterContent.Equals(beforeContent) && page.Title != Configuration.GetValue<string>("WikiRequestPage"))
                         {
                             if (Request.Status != JobStatus.Approved) //Create diffs for approval
                             {
@@ -113,10 +117,16 @@ namespace Wikibot.Logic.Jobs
                                 UpdatePageContentWithMessage(page, afterContent, editMessage);
                             }
                         }
+                        else
+                        {
+                            pagesToRemove.Add(page);
+                        }
                         Thread.Sleep(1000 * _throttleSpeedInSeconds);
                     }
+                    
                     Retriever.UpdateRequests(new List<WikiJobRequest> { Request });
                     site.LogoutAsync().Wait();
+                    PageList = PageList.Except(pagesToRemove);
                 }
             }
             catch(Exception ex)
