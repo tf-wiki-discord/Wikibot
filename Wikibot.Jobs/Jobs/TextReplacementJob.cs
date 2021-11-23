@@ -123,10 +123,11 @@ namespace Wikibot.Logic.Jobs
                         }
                         Thread.Sleep(1000 * _throttleSpeedInSeconds);
                     }
-                    
+
+                    PageList = PageList.Except(pagesToRemove);
                     Retriever.UpdateRequests(new List<WikiJobRequest> { Request });
                     site.LogoutAsync().Wait();
-                    PageList = PageList.Except(pagesToRemove);
+                    
                 }
             }
             catch(Exception ex)
