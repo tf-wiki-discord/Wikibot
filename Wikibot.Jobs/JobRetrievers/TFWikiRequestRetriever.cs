@@ -124,7 +124,7 @@ namespace Wikibot.Logic.JobRetrievers
 
                     foreach (WikiJobRequest request in requests)
                     {
-                        _log.Information($"Processing request ID: {request.ID} with raw {request.RawRequest}");
+                        _log.Information($"Updating request ID: {request.ID} with raw {request.RawRequest}");
                         //Find corresponding template in the page content
                         var templates = wikiText.EnumDescendants().OfType<Template>();
                         var requestTemplates = templates.Where(template => template.Name.ToPlainText().Equals(_botRequestTemplate));

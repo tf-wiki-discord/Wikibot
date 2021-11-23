@@ -73,16 +73,20 @@ namespace Wikibot.Logic.Jobs
                                 var existingRequest = JobData.GetWikiJobRequestByID(request.ID);
                                 requestIsValid = requestIsValid && request.RawRequest.Equals(existingRequest.RawRequest);
                                 Log.Information($"Existing request {existingRequest.RawRequest} equals is {requestIsValid}");
-                            }
 
-                            if (requestIsValid && (request.Status == JobStatus.Approved || request.Status == JobStatus.PreApproved))
-                            {
-                                Log.Information("Scheduling request");
-                                //Schedule jobs in 10 minute intervals
-                                //How to deal with potential page edit overlaps? -> Check page lists and id overlaps;
-                                var job = _requestRetriever.GetJobForRequest(request);
-                                JobManager.AddJob(() => job.Execute(), (s) => s.ToRunOnceIn(runin + offset).Minutes());
-                                offset = offset + 10;
+
+                                //If the request matches an existing one and the status is either Approved or PreApproved
+                                // i.e. the job isn't pending approval of some sort, nor is it currently processing
+                                if (requestIsValid && (existingRequest.Status == JobStatus.Approved || existingRequest.Status == JobStatus.PreApproved))
+                                {
+                                    Log.Information("Scheduling request");
+                                    //Schedule jobs in 10 minute intervals
+                                    //How to deal with potential page edit overlaps? -> Check page lists and id overlaps;
+                                    var job = _requestRetriever.GetJobForRequest(request);
+                                    JobData.UpdateStatus(request.ID, JobStatus.Processing);
+                                    JobManager.AddJob(() => job.Execute(), (s) => s.ToRunOnceIn(runin + offset).Minutes());
+                                    offset = offset + 10;
+                                }
                             }
                         }
                         catch (Exception ex)

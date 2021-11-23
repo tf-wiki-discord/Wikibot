@@ -9,6 +9,7 @@
         Approved,
         Rejected,
         Done,
-        Failed
+        Failed,
+        Processing
     }
 }
