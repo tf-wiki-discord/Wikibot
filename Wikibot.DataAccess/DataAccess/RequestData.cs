@@ -108,7 +108,7 @@ namespace Wikibot.DataAccess
             p.Add("@Status", request.Status, System.Data.DbType.Int32);
             p.Add("@SubmittedDate", request.SubmittedDateUTC, System.Data.DbType.DateTime2);
             p.Add("@Username", request.RequestingUsername, System.Data.DbType.String);
-            p.Add("@ID", request.ID, System.Data.DbType.Int64, System.Data.ParameterDirection.Output);
+            p.Add("@ID", request.ID, System.Data.DbType.Int64);
 
             p.RemoveUnused = true;
 
