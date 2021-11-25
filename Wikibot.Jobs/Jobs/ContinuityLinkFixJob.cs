@@ -148,7 +148,7 @@ namespace Wikibot.Logic.Jobs
 
                                 Utilities.GenerateAndSaveDiff(beforeContent, afterContent, page.Title, Request.ID, Configuration["DiffDirectory"], folderName);
 
-                                JobData.SaveWikiJobRequest(Request); //Save page list                        
+                                                    
                             }
                             else //Apply changes
                             {
@@ -160,6 +160,7 @@ namespace Wikibot.Logic.Jobs
                    
                         Thread.Sleep(1000 * _throttleSpeedInSeconds);
                      }
+                        
                 }
                 Thread.Sleep(1000);
             }
@@ -171,6 +172,7 @@ namespace Wikibot.Logic.Jobs
             {
                 SetJobEnd();
                 SaveRequest();
+                JobData.UpdateWikiJobRequest(Request); //Save page list
             }
         }
 

@@ -46,8 +46,8 @@ namespace Wikibot.Tests
 
             r.RemoveUnused = true;
 
-            requestData.SaveWikiJobRequest(request);
-            mockDataAccess.Verify(dataAccess => dataAccess.SaveData<dynamic>("dbo.spCreateUpdateWikiJobRequest", It.Is<object>(y => VerifyHelper.AreEqualObjects(y, r)), "JobDb"), Times.Exactly(1));
+            requestData.CreateWikiJobRequest(request);
+            mockDataAccess.Verify(dataAccess => dataAccess.SaveData<dynamic>("dbo.spCreateWikiJobRequest", It.Is<object>(y => VerifyHelper.AreEqualObjects(y, r)), "JobDb"), Times.Exactly(1));
         }
 
         [Fact]

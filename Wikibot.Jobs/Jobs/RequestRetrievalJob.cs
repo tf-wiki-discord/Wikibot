@@ -59,7 +59,7 @@ namespace Wikibot.Logic.Jobs
                                 CheckForUserApproval(request, jobApprovalLogic);
 
                                 //Save Job
-                                JobData.SaveWikiJobRequest(request);
+                                JobData.CreateWikiJobRequest(request);
 
                                 //Add to update list
                                 requestsToUpdate.Add(request);

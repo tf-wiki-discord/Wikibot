@@ -77,7 +77,7 @@ namespace Wikibot.DataAccess
             return output.SingleOrDefault();
         }
 
-        public long SaveWikiJobRequest(WikiJobRequest request)
+        public long CreateWikiJobRequest(WikiJobRequest request)
         {
             var p = new DynamicParameters();
             p.Add("@Comment", request.Comment, System.Data.DbType.String);
@@ -90,13 +90,34 @@ namespace Wikibot.DataAccess
 
             p.RemoveUnused = true;
 
-            _database.SaveData("dbo.spCreateUpdateWikiJobRequest", p, "JobDb");
+            _database.SaveData("dbo.spCreateWikiJobRequest", p, "JobDb");
             request.ID = p.Get<long>("ID");
             if (request.Pages != null && request.Pages.Any())
             {    
                 new PageData(_database).SavePages(request.Pages, request.ID);
             }
             return request.ID;
+        }
+
+        public void UpdateWikiJobRequest(WikiJobRequest request)
+        {
+            var p = new DynamicParameters();
+            p.Add("@Comment", request.Comment, System.Data.DbType.String);
+            p.Add("@JobType", request.JobType, System.Data.DbType.String);
+            p.Add("@RawRequest", request.RawRequest, System.Data.DbType.String);
+            p.Add("@Status", request.Status, System.Data.DbType.Int32);
+            p.Add("@SubmittedDate", request.SubmittedDateUTC, System.Data.DbType.DateTime2);
+            p.Add("@Username", request.RequestingUsername, System.Data.DbType.String);
+            p.Add("@ID", request.ID, System.Data.DbType.Int64, System.Data.ParameterDirection.Output);
+
+            p.RemoveUnused = true;
+
+            _database.SaveData("dbo.spUpdateWikiJobRequest", p, "JobDb");
+
+            if (request.Pages != null && request.Pages.Any())
+            {
+                new PageData(_database).SavePages(request.Pages, request.ID);
+            }
         }
 
         public void UpdateStatus(long requestID, JobStatus status)

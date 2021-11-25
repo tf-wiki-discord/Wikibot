@@ -94,6 +94,7 @@ namespace Wikibot.Logic.Jobs
                         filename = "Diff-" + Request.ID + "-" + page.Title + ".txt"; //Set filename for this page
                         page.RefreshAsync(PageQueryOptions.FetchContent | PageQueryOptions.ResolveRedirects).Wait(); //Load page content
                         
+                        
                         var beforeContent = page.Content;
                         var afterContent = page.Content.Replace(FromText, ToText);
                         if (!afterContent.Equals(beforeContent) && page.Title != Configuration.GetValue<string>("WikiRequestPage"))
@@ -107,9 +108,7 @@ namespace Wikibot.Logic.Jobs
                                     Directory.CreateDirectory(folderPath);
                                 }
 
-                                Utilities.GenerateAndSaveDiff(beforeContent, afterContent, page.Title, Request.ID, Configuration["DiffDirectory"], folderName);
-
-                                JobData.SaveWikiJobRequest(Request); //Save page list                        
+                                Utilities.GenerateAndSaveDiff(beforeContent, afterContent, page.Title, Request.ID, Configuration["DiffDirectory"], folderName);                      
                             }
                             else //Apply changes
                             {
@@ -125,9 +124,14 @@ namespace Wikibot.Logic.Jobs
                         Thread.Sleep(1000 * _throttleSpeedInSeconds);
                     }
 
-                    PageList = PageList.Except(pagesToRemove);
-                    Request.Pages = PageList.Select(x => new Page(0, x.Title)).ToList();
-                    Retriever.UpdateRequests(new List<WikiJobRequest> { Request });
+                    if (Request.Status == JobStatus.PreApproved)
+                    {
+                        PageList = PageList.Except(pagesToRemove);
+                        Request.Pages = PageList.Select(x => new Page(0, x.Title)).ToList();
+
+                        JobData.UpdateWikiJobRequest(Request); //Save page list
+                    }
+                    //Retriever.UpdateRequests(new List<WikiJobRequest> { Request });
                     site.LogoutAsync().Wait();
                     
                 }

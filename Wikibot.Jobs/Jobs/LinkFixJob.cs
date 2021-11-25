@@ -105,7 +105,7 @@ namespace Wikibot.Logic.Jobs
                             {
                                 Log.Information("Generating diff for page {PageName}", page.Title);
                                 Utilities.GenerateAndSaveDiff(beforeContent, afterContent, page.Title, Request.ID, Configuration["DiffDirectory"], folderName);
-                                JobData.SaveWikiJobRequest(Request); //Save page list                        
+                                                       
                             }
                             else //Apply changes
                             {
@@ -127,6 +127,7 @@ namespace Wikibot.Logic.Jobs
             {
                 SetJobEnd();
                 SaveRequest();
+                JobData.UpdateWikiJobRequest(Request); //Save page list 
             }
         }
 
