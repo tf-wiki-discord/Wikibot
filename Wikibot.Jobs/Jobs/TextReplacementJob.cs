@@ -16,6 +16,7 @@ using Wikibot.Logic.Logic;
 using Wikibot.Logic.UserRetrievers;
 using WikiClientLibrary.Client;
 using WikiClientLibrary.Pages;
+using WikiClientLibrary.Pages.Queries;
 using WikiClientLibrary.Sites;
 using WikiFunctions;
 
@@ -76,7 +77,7 @@ namespace Wikibot.Logic.Jobs
                         }
                     }
 
-                    var PageList = SearchPageText(site, searchText);
+                   var PageList = SearchPageText(site, searchText);
 
                     if (backLinks.Any())
                     {
@@ -92,7 +93,7 @@ namespace Wikibot.Logic.Jobs
                         Log.Information("Processing page {PageName}", page.Title);
                         filename = "Diff-" + Request.ID + "-" + page.Title + ".txt"; //Set filename for this page
                         page.RefreshAsync(PageQueryOptions.FetchContent | PageQueryOptions.ResolveRedirects).Wait(); //Load page content
-
+                        
                         var beforeContent = page.Content;
                         var afterContent = page.Content.Replace(FromText, ToText);
                         if (!afterContent.Equals(beforeContent) && page.Title != Configuration.GetValue<string>("WikiRequestPage"))
@@ -125,6 +126,7 @@ namespace Wikibot.Logic.Jobs
                     }
 
                     PageList = PageList.Except(pagesToRemove);
+                    Request.Pages = PageList.Select(x => new Page(0, x.Title)).ToList();
                     Retriever.UpdateRequests(new List<WikiJobRequest> { Request });
                     site.LogoutAsync().Wait();
                     

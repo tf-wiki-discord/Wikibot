@@ -8,7 +8,10 @@
 	@ID BIGINT Output
 AS
 BEGIN
-	SET @ID = (SELECT Id FROM [dbo].WikiJobRequest WHERE RawRequest = @RawRequest)
+	IF(@ID = 0)
+	BEGIN
+		SET @ID = (SELECT Id FROM [dbo].WikiJobRequest WHERE RawRequest = @RawRequest)
+	END
 	IF EXISTS (SELECT Id FROM [dbo].WikiJobRequest WHERE Id = @ID)
 		BEGIN
 			UPDATE [dbo].WikiJobRequest SET Comment = @Comment, RequestingUsername = @Username, StatusID = @Status, RawRequest = @RawRequest, SubmittedDateUTC = @SubmittedDate, JobType = @JobType

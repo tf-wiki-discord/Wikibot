@@ -75,8 +75,8 @@ namespace Wikibot.Logic.Jobs
                         {
                             wikiText = parser.Parse("");
                         }
-                        wikiText.InsertBefore(welcomeTemplate);
-                        page.Content = wikiText.ToString();
+                        StringBuilder sb = new StringBuilder();
+                        page.Content = sb.AppendLine(_templateMarkup).Append(wikiText.ToString()).ToString();
                         if (!unitTest)
                         {
                             await page.UpdateContentAsync(_editSummary, true, true);
