@@ -47,9 +47,6 @@ jobs:
         RootAdminUsername: "${{secrets.RootAdminUserName }}"
     - name: Build
       run: dotnet build --no-restore -c:Release
-    
-    - name: BuildDB
-      run: dotnet build "Wikibot.Data/Wikibot.Data.sqlproj"  --no-restore -c:Release
    
     - name: Deploy
       run: dotnet publish -p:PublishProfile=IISProfile -c:Release -p:AllowUntrustedCertificate=true -p:Username="${{ secrets.DeployUsername }}" -p:Password="${{ secrets.DeployPassword }}" --no-build
