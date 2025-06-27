@@ -47,7 +47,17 @@ jobs:
         RootAdminUsername: "${{secrets.RootAdminUserName }}"
     - name: Build
       run: dotnet build --no-restore -c:Release
+    
+    - name: BuildDB
+      run: dotnet build "Wikibot.Data/Wikibot.Data.sqlproj"
    
     - name: Deploy
       run: dotnet publish -p:PublishProfile=IISProfile -c:Release -p:AllowUntrustedCertificate=true -p:Username="${{ secrets.DeployUsername }}" -p:Password="${{ secrets.DeployPassword }}" --no-build
+
+    - name: DeployDB
+      uses: azure/sql-action@v2
+      with:
+        connection-string: ${{ secrets.SqlConnectionString }}
+        action: 'publish'
+        path: 'bin/Debug/Wikibot.Data.dacpac'
 
