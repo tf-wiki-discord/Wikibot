@@ -54,8 +54,8 @@ jobs:
      
     - name: BuildDB
       run: |
-        dotnet tool install -g Microsoft.SqlPackage \
-        dotnet new install Microsoft.Build.Sql.Templates \
+        dotnet tool install -g Microsoft.SqlPackage
+        dotnet new install Microsoft.Build.Sql.Templates
         dotnet build Wikibot.Data\Wikibot.Data.sqlproj
         
     - name: DeployDB
