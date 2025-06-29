@@ -47,10 +47,17 @@ jobs:
         RootAdminUsername: "${{secrets.RootAdminUserName }}"
     - name: Build
       run: dotnet build --no-restore -c:Release
-   
-    - name: Deploy
-      run: dotnet publish -p:PublishProfile=IISProfile -c:Release -p:AllowUntrustedCertificate=true -p:Username="${{ secrets.DeployUsername }}" -p:Password="${{ secrets.DeployPassword }}" --no-build
 
+    - name: Deploy
+      run: 
+        dotnet publish -p:PublishProfile=IISProfile -c:Release -p:AllowUntrustedCertificate=true -p:Username="${{ secrets.DeployUsername }}" -p:Password="${{ secrets.DeployPassword }}" --no-build
+     
+    - name: BuildDB
+      run: 
+        dotnet tool install -g Microsoft.SqlPackage
+        dotnet new install Microsoft.Build.Sql.Templates
+        dotnet build MyDatabaseProject.sqlproj
+        
     - name: DeployDB
       uses: azure/sql-action@v2
       with:
