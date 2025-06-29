@@ -56,7 +56,7 @@ jobs:
       run: |
         dotnet tool install -g Microsoft.SqlPackage\
         dotnet new install Microsoft.Build.Sql.Templates\
-        dotnet build MyDatabaseProject.sqlproj\
+        dotnet build Wikibot.Data.sqlproj
         
     - name: DeployDB
       uses: azure/sql-action@v2
